@@ -1,27 +1,38 @@
-# A simple workflow to demonstrate a custom step name.
-name: CI
+name: CI with Caching
 
-# Controls when the workflow will run
 on:
-  # Triggers the workflow on push events but only for the "main" branch
   push:
     branches: [ "main" ]
-  
-  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
-  build:
-    # The type of runner that the job will run on
+  build-with-cache:
     runs-on: ubuntu-latest
 
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # A step with a name containing the required email address
-      - name: "23f3000115@ds.study.iitm.ac.in"
-        run: echo "This step is being checked by the grader!"
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - name: A second step
-        run: echo "Hello, world!"
+      - name: 23f3000115@ds.study.iitm.ac.in
+        uses: astral-sh/setup-uv@v5
+      
+      - name: Create virtual environment
+        run: uv venv
+
+      - name: Cache uv dependencies
+        uses: actions/cache@v4
+        id: cache-uv # Give the step an id to check its output
+        with:
+          path: ~/.cache/uv
+          key: cache-237497d
+
+      - name: Install dependencies
+        run: uv pip install -r requirements.txt
+
+      - name: prime-cache-237497d
+        run: |
+          if [[ "${{ steps.cache-uv.outputs.cache-hit }}" == "true" ]]; then
+            echo "Cache hit! Dependencies were restored."
+          else
+            echo "Cache miss. Dependencies were installed and cache will be saved."
+          fi
